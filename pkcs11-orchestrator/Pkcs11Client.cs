@@ -43,6 +43,28 @@ namespace pkcs11_orchestrator
             return _p11Session;
         }
 
+        public List<List<IObjectAttribute>> FindAllCertificates(ISession session)
+        {
+            var certAttributesList = new List<List<IObjectAttribute>>();
+
+            var searchAttributes = new List<IObjectAttribute>()
+            {
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_CERTIFICATE),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true)
+            };
+
+            var certsFound = session.FindAllObjects(searchAttributes);
+
+            foreach (IObjectHandle certObjectHandle in certsFound)
+            {
+                var certAttributes = session.GetAttributeValue(certObjectHandle, new List<CKA> { CKA.CKA_VALUE, CKA.CKA_LABEL, CKA.CKA_ID });
+                certAttributesList.Add(certAttributes);
+            }
+
+            return certAttributesList;
+        }
+
         public void PrintSlotContents(ISlot slot)
         {
             ISlotInfo slotInfo = slot.GetSlotInfo();

@@ -64,6 +64,20 @@ BGEcQzfZfyC17B93uX6+HPesS444RFj/ANK9hDC8vwYIb9a3X3mF/hAaVFlUpvu1
             var dotnetcert = new X509Certificate2(cert.GetEncoded());
             p11.StoreCertificate(session, ckaId, dotnetcert);
 
+
+            Console.WriteLine("Searching for all certificates");
+            var certAttributes = p11.FindAllCertificates(session);
+
+            Console.WriteLine($"Certs Found: {certAttributes.Count}");
+            foreach (var certAttr in certAttributes)
+            {
+                var certFromAttr = new X509Certificate2(certAttr[0].GetValueAsByteArray());
+                Console.WriteLine($"Subject from cert: {certFromAttr.Subject}");
+                Console.WriteLine($"Thumbprint: {certFromAttr.Thumbprint}");
+                Console.WriteLine($"Label: {certAttr[1].GetValueAsString()}");
+                Console.WriteLine($"CKA ID: {Encoding.UTF8.GetString(certAttr[2].GetValueAsByteArray())}");
+            }
+
             Console.WriteLine("Finished running pkcs11 ---");
         }
     }
