@@ -11,7 +11,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Asn1.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 
-namespace pkcs11_orchestrator
+namespace Keyfactor.Orchestrator.Extensions.Pkcs11
 {
     public class Pkcs11Client : IDisposable
     {
@@ -63,6 +63,21 @@ namespace pkcs11_orchestrator
             }
 
             return certAttributesList;
+        }
+
+        public bool CertificateHasPrivateKey(ISession session, byte[] ckaId, string label)
+        {
+            var searchAttributes = new List<IObjectAttribute>()
+            {
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_PRIVATE_KEY),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, label)
+            };
+
+            var privKeyFound = session.FindAllObjects(searchAttributes);
+
+            return privKeyFound.Count == 1;
         }
 
         public static void GenerateKeyPair(ISession session, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle)
