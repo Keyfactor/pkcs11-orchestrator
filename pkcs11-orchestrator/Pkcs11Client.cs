@@ -9,6 +9,7 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Asn1.Pkcs;
+using System.Security.Cryptography.X509Certificates;
 
 namespace pkcs11_orchestrator
 {
@@ -35,10 +36,10 @@ namespace pkcs11_orchestrator
             return slots.First();
         }
 
-        public ISession LogInToSlot(ISlot slot, string apiKey)
+        public ISession LogInToSlot(ISlot slot, string pin)
         {
             _p11Session = slot.OpenSession(SessionType.ReadWrite);
-            _p11Session.Login(CKU.CKU_USER, apiKey);
+            _p11Session.Login(CKU.CKU_USER, pin);
             return _p11Session;
         }
 
@@ -132,6 +133,21 @@ namespace pkcs11_orchestrator
             csr.SignRequest(csrSignature);
             var formattedCsr = $"-----BEGIN CERTIFICATE REQUEST-----\n{Convert.ToBase64String(csr.GetDerEncoded(), Base64FormattingOptions.InsertLineBreaks)}\n-----END CERTIFICATE REQUEST-----";
             return formattedCsr;
+        }
+
+        public IObjectHandle StoreCertificate(ISession session, byte[] ckaId, X509Certificate2 cert)
+        {
+            // set up CK object with certificate attributes
+            List<IObjectAttribute> certificateAttributes = new List<IObjectAttribute>();
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_CERTIFICATE));
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, "keyfactor"));
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId)); // use existing ID of the keypair
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SUBJECT, "CN=pkcs11test&O=Keyfactor")); // TODO: paramterize subject
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE, cert.RawData));
+            
+            return session.CreateObject(certificateAttributes);
         }
 
         public void RunLoggedOnDiagnostics(string pkcs11LibraryPath, string apiKey)
