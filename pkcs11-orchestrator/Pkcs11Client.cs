@@ -140,6 +140,8 @@ namespace pkcs11_orchestrator
             // set up CK object with certificate attributes
             List<IObjectAttribute> certificateAttributes = new List<IObjectAttribute>();
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_CERTIFICATE));
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509));
+            //certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_CATEGORY, (CKC) CK.CK_CERTIFICATE_CATEGORY_UNSPECIFIED)); // unsure if need to specify category
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, "keyfactor"));
