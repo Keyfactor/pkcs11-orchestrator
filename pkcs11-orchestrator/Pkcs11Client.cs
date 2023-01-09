@@ -80,7 +80,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
             return privKeyFound.Count == 1;
         }
 
-        public static void GenerateKeyPair(ISession session, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle)
+        public void GenerateKeyPair(ISession session, string alias, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle, out byte[] outCkaId)
         {
             // The CKA_ID attribute is supposed to be the same for a keypair and matching certificate
             byte[] ckaId = session.GenerateRandom(20);
@@ -89,7 +89,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
             List<IObjectAttribute> publicKeyAttributes = new List<IObjectAttribute>();
             //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, "keyfactor"));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, alias));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY, true));
@@ -102,7 +102,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
             List<IObjectAttribute> privateKeyAttributes = new List<IObjectAttribute>();
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, true));
-            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, "keyfactor"));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, alias));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SENSITIVE, true));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
@@ -115,12 +115,13 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
 
             // Generate key pair
             session.GenerateKeyPair(mechanism, publicKeyAttributes, privateKeyAttributes, out publicKeyHandle, out privateKeyHandle);
+            outCkaId = ckaId;
         }
 
-        public string CreateCsr(ISession session, IObjectHandle publicKeyHandle, IObjectHandle privateKeyHandle)
+        public string CreateCsr(ISession session, string subjectIn, IObjectHandle publicKeyHandle, IObjectHandle privateKeyHandle)
         {
             AsymmetricKeyParameter publicKey = null;
-            var subject = new X509Name("CN=pkcs11test&O=Keyfactor");
+            var subject = new X509Name(subjectIn);
             var sigAlg = PkcsObjectIdentifiers.Sha256WithRsaEncryption.Id;
             string keytype = "RSA";
             if (keytype == "RSA")

@@ -2,7 +2,7 @@
 using Net.Pkcs11Interop.HighLevelAPI;
 using Org.BouncyCastle.Utilities.IO.Pem;
 using Org.BouncyCastle.X509;
-using pkcs11_orchestrator;
+using Keyfactor.Orchestrator.Extensions.Pkcs11;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,12 +23,11 @@ namespace p0
             string pin = "5678";
             var session = p11.LogInToSlot(slot, pin);
             IObjectHandle pubKey, privKey;
-            Pkcs11Client.GenerateKeyPair(session, out pubKey, out privKey);
-            var csr = p11.CreateCsr(session, pubKey, privKey);
+            p11.GenerateKeyPair(session, "keyfactor", out pubKey, out privKey, out byte[] ckaId);
+            var csr = p11.CreateCsr(session, "CN=pkcs11test&O=Keyfactor", pubKey, privKey);
             Console.WriteLine("Generated CSR with keys in HSM:");
             Console.WriteLine(csr);
 
-            var ckaId = session.GetAttributeValue(pubKey, new List<CKA> { CKA.CKA_ID })[0].GetValueAsByteArray();
             Console.WriteLine($"CKA ID for KeyPair: {ckaId}");
 
             var pemCert = @"-----BEGIN CERTIFICATE-----
