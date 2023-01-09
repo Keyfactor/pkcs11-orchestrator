@@ -20,7 +20,6 @@ namespace p0
             //var p11 = new Pkcs11Client(@"C:\Program Files\Fortanix\KmsClient\FortanixKmsPkcs11.dll");
             var p11 = new Pkcs11Client(@"C:\SoftHSM2\lib\softhsm2-x64.dll");
             var slot = p11.GetOpenSlot();
-            p11.PrintSlotContents(slot);
             string pin = "5678";
             var session = p11.LogInToSlot(slot, pin);
             IObjectHandle pubKey, privKey;

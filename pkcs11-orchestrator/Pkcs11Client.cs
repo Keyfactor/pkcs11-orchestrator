@@ -65,37 +65,9 @@ namespace pkcs11_orchestrator
             return certAttributesList;
         }
 
-        public void PrintSlotContents(ISlot slot)
-        {
-            ISlotInfo slotInfo = slot.GetSlotInfo();
-
-            Console.WriteLine();
-            Console.WriteLine("Slot");
-            Console.WriteLine("  Manufacturer:       " + slotInfo.ManufacturerId);
-            Console.WriteLine("  Description:        " + slotInfo.SlotDescription);
-            Console.WriteLine("  Token present:      " + slotInfo.SlotFlags.TokenPresent);
-
-            if (slotInfo.SlotFlags.TokenPresent)
-            {
-                // Show basic information about token present in the slot
-                ITokenInfo tokenInfo = slot.GetTokenInfo();
-
-                Console.WriteLine("Token");
-                Console.WriteLine("  Manufacturer:       " + tokenInfo.ManufacturerId);
-                Console.WriteLine("  Model:              " + tokenInfo.Model);
-                Console.WriteLine("  Serial number:      " + tokenInfo.SerialNumber);
-                Console.WriteLine("  Label:              " + tokenInfo.Label);
-
-                // Show list of mechanisms (algorithms) supported by the token
-                Console.WriteLine("Supported mechanisms: ");
-                foreach (CKM mechanism in slot.GetMechanismList())
-                    Console.WriteLine("  " + mechanism);
-            }
-        }
-
         public static void GenerateKeyPair(ISession session, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle)
         {
-            // The CKA_ID attribute is intended as a means of distinguishing multiple key pairs held by the same subject
+            // The CKA_ID attribute is supposed to be the same for a keypair and matching certificate
             byte[] ckaId = session.GenerateRandom(20);
 
             // Prepare attribute template of new public key
@@ -172,110 +144,6 @@ namespace pkcs11_orchestrator
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE, cert.RawData));
             
             return session.CreateObject(certificateAttributes);
-        }
-
-        public void RunLoggedOnDiagnostics(string pkcs11LibraryPath, string apiKey)
-        {
-            // Create factories used by Pkcs11Interop library
-            Pkcs11InteropFactories factories = new Pkcs11InteropFactories();
-
-            // Load unmanaged PKCS#11 library
-            using (IPkcs11Library pkcs11Library = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, pkcs11LibraryPath, AppType.MultiThreaded))
-            {
-                // Show general information about loaded library
-                ILibraryInfo libraryInfo = pkcs11Library.GetInfo();
-
-                Console.WriteLine("Library");
-                Console.WriteLine("  Manufacturer:       " + libraryInfo.ManufacturerId);
-                Console.WriteLine("  Description:        " + libraryInfo.LibraryDescription);
-                Console.WriteLine("  Version:            " + libraryInfo.LibraryVersion);
-
-                // Get list of all available slots
-                foreach (ISlot slot in pkcs11Library.GetSlotList(SlotsType.WithOrWithoutTokenPresent))
-                {
-                    // log into slot
-                    var session = slot.OpenSession(SessionType.ReadWrite);
-                    session.Login(CKU.CKU_USER, apiKey);
-
-                    // Show basic information about slot
-                    ISlotInfo slotInfo = slot.GetSlotInfo();
-
-                    Console.WriteLine();
-                    Console.WriteLine("Slot");
-                    Console.WriteLine("  Manufacturer:       " + slotInfo.ManufacturerId);
-                    Console.WriteLine("  Description:        " + slotInfo.SlotDescription);
-                    Console.WriteLine("  Token present:      " + slotInfo.SlotFlags.TokenPresent);
-
-                    if (slotInfo.SlotFlags.TokenPresent)
-                    {
-                        // Show basic information about token present in the slot
-                        ITokenInfo tokenInfo = slot.GetTokenInfo();
-
-                        Console.WriteLine("Token");
-                        Console.WriteLine("  Manufacturer:       " + tokenInfo.ManufacturerId);
-                        Console.WriteLine("  Model:              " + tokenInfo.Model);
-                        Console.WriteLine("  Serial number:      " + tokenInfo.SerialNumber);
-                        Console.WriteLine("  Label:              " + tokenInfo.Label);
-
-                        // Show list of mechanisms (algorithms) supported by the token
-                        Console.WriteLine("Supported mechanisms: ");
-                        foreach (CKM mechanism in slot.GetMechanismList())
-                            Console.WriteLine("  " + mechanism);
-                    }
-
-                    session.Logout();
-                    session.CloseSession();
-                }
-            }
-        }
-
-        public void RunGeneralDiagnostics(string pkcs11LibraryPath)
-        {
-
-            // Create factories used by Pkcs11Interop library
-            Pkcs11InteropFactories factories = new Pkcs11InteropFactories();
-
-            // Load unmanaged PKCS#11 library
-            using (IPkcs11Library pkcs11Library = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, pkcs11LibraryPath, AppType.MultiThreaded))
-            {
-                // Show general information about loaded library
-                ILibraryInfo libraryInfo = pkcs11Library.GetInfo();
-
-                Console.WriteLine("Library");
-                Console.WriteLine("  Manufacturer:       " + libraryInfo.ManufacturerId);
-                Console.WriteLine("  Description:        " + libraryInfo.LibraryDescription);
-                Console.WriteLine("  Version:            " + libraryInfo.LibraryVersion);
-
-                // Get list of all available slots
-                foreach (ISlot slot in pkcs11Library.GetSlotList(SlotsType.WithOrWithoutTokenPresent))
-                {
-                    // Show basic information about slot
-                    ISlotInfo slotInfo = slot.GetSlotInfo();
-
-                    Console.WriteLine();
-                    Console.WriteLine("Slot");
-                    Console.WriteLine("  Manufacturer:       " + slotInfo.ManufacturerId);
-                    Console.WriteLine("  Description:        " + slotInfo.SlotDescription);
-                    Console.WriteLine("  Token present:      " + slotInfo.SlotFlags.TokenPresent);
-
-                    if (slotInfo.SlotFlags.TokenPresent)
-                    {
-                        // Show basic information about token present in the slot
-                        ITokenInfo tokenInfo = slot.GetTokenInfo();
-
-                        Console.WriteLine("Token");
-                        Console.WriteLine("  Manufacturer:       " + tokenInfo.ManufacturerId);
-                        Console.WriteLine("  Model:              " + tokenInfo.Model);
-                        Console.WriteLine("  Serial number:      " + tokenInfo.SerialNumber);
-                        Console.WriteLine("  Label:              " + tokenInfo.Label);
-
-                        // Show list of mechanisms (algorithms) supported by the token
-                        Console.WriteLine("Supported mechanisms: ");
-                        foreach (CKM mechanism in slot.GetMechanismList())
-                            Console.WriteLine("  " + mechanism);
-                    }
-                }
-            }
         }
 
         public void Dispose()
