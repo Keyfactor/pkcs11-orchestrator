@@ -1,0 +1,14 @@
+{
+  "extensions": {
+    "Keyfactor.Orchestrators.Extensions.IOrchestratorJobExtension": {
+      "CertStores.PKCS11.Inventory": {
+        "assemblypath": "pkcs11-orchestrator.dll",
+        "TypeFullName": "Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs.Inventory"
+      },
+      "CertStores.PKCS11.Reenrollment": {
+        "assemblypath": "pkcs11-orchestrator.dll",
+        "TypeFullName": "Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs.Reenrollment"
+      }
+    }
+  }
+}

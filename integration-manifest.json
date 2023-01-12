@@ -1,9 +1,9 @@
 {
   "$schema": "https://keyfactor.github.io/integration-manifest-schema.json",
   "integration_type": "orchestrator",
-  "name": "Integration Template",
+  "name": "PKCS11",
   "status": "prototype",
-  "description": "This project is meant to be a template to quickly build a basic integration product build. Currently in dev, a work in progress,",
+  "description": "This Orchestrator Extension allows for interacting with PKCS11-compatible devices to inventory certificates and enroll new certificates with on-device key generation via a reenrollment job.",
   "link_github": false,
   "about": {
     "orchestrator": {
@@ -12,8 +12,8 @@
         "supportsDiscovery": false,
         "supportsManagementAdd": false,
         "supportsManagementRemove": false,
-        "supportsReenrollment": false,
-        "supportsInventory": false
+        "supportsReenrollment": true,
+        "supportsInventory": true
       },
       "linux": {
         "supportsCreateStore": false,

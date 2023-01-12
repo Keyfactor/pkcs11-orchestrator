@@ -58,7 +58,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs
 
             logger.LogInformation($"Found {inventory.Count} certificates.");
             bool success = submitInventoryUpdate.Invoke(inventory);
-            logger.LogTrace("Inventory resulst submitted to Keyfactor.");
+            logger.LogTrace("Inventory results submitted to Keyfactor.");
 
             JobResult result = new JobResult()
             {

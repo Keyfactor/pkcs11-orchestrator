@@ -21,7 +21,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs
             var allJobProps = jobConfiguration.JobProperties;
             string subject = allJobProps["subjectText"].ToString();
             string keyType = allJobProps["keyType"].ToString();
-            string alias = allJobProps["alias"].ToString();
+            string label = allJobProps["label"].ToString();
 
             logger.LogDebug($"Attempting to load PKCS11 Library at {pkcs11LibraryPath}");
             Pkcs11Client p11 = new Pkcs11Client(pkcs11LibraryPath);
@@ -40,7 +40,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs
                 IObjectHandle pubKeyHandle, privKeyHandle;
                 byte[] ckaId;
                 logger.LogDebug("Attempting to generate new keypair.");
-                p11.GenerateKeyPair(session, alias, out pubKeyHandle, out privKeyHandle, out ckaId);
+                p11.GenerateKeyPair(session, label, out pubKeyHandle, out privKeyHandle, out ckaId);
                 logger.LogInformation("New keypair generated on PKCS11 device.");
 
                 logger.LogDebug("Creating CSR...");
