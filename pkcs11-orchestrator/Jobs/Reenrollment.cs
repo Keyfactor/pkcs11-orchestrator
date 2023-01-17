@@ -14,7 +14,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs
 
         public JobResult ProcessJob(ReenrollmentJobConfiguration jobConfiguration, SubmitReenrollmentCSR submitReenrollmentUpdate)
         {
-            ILogger logger = LogHandler.GetClassLogger<Inventory>();
+            ILogger logger = LogHandler.GetClassLogger<Reenrollment>();
             string pkcs11LibraryPath = jobConfiguration.CertificateStoreDetails.StorePath;
             string userPin = jobConfiguration.CertificateStoreDetails.StorePassword;
 

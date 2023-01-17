@@ -10,23 +10,30 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Asn1.Pkcs;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
+using Keyfactor.Logging;
 
 namespace Keyfactor.Orchestrator.Extensions.Pkcs11
 {
     public class Pkcs11Client : IDisposable
     {
         string pkcs11LibraryPath = "";
-        private IPkcs11Library _p11;
+        private static IPkcs11Library _p11 = null;
         private ISession _p11Session;
 
         public Pkcs11Client(string libPath)
         {
+            ILogger logger = LogHandler.GetClassLogger<Pkcs11Client>();
             pkcs11LibraryPath = libPath;
 
             // Create factories used by Pkcs11Interop library
             Pkcs11InteropFactories factories = new Pkcs11InteropFactories();
             // Load unmanaged PKCS#11 library
-            _p11 = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, pkcs11LibraryPath, AppType.MultiThreaded);
+            if (_p11 == null)
+            {
+                logger.LogTrace("No loaded PKCS11 library found, loading new PKCS11 library instance");
+                _p11 = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, pkcs11LibraryPath, AppType.SingleThreaded);
+            }
         }
 
         public ISlot GetOpenSlot()
@@ -173,7 +180,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
             finally
             {
                 // unload unmanaged PKCS11 library
-                _p11.Dispose();
+                //_p11.Dispose();
             }
         }
     }
