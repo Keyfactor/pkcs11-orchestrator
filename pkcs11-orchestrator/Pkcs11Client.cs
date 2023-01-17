@@ -18,22 +18,16 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
     public class Pkcs11Client : IDisposable
     {
         string pkcs11LibraryPath = "";
-        private static IPkcs11Library _p11 = null;
+        private IPkcs11Library _p11 = null;
         private ISession _p11Session;
+        private ILogger _logger;
 
         public Pkcs11Client(string libPath)
         {
-            ILogger logger = LogHandler.GetClassLogger<Pkcs11Client>();
-            pkcs11LibraryPath = libPath;
+            _logger = LogHandler.GetClassLogger<Pkcs11Client>();
 
-            // Create factories used by Pkcs11Interop library
-            Pkcs11InteropFactories factories = new Pkcs11InteropFactories();
-            // Load unmanaged PKCS#11 library
-            if (_p11 == null)
-            {
-                logger.LogTrace("No loaded PKCS11 library found, loading new PKCS11 library instance");
-                _p11 = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, pkcs11LibraryPath, AppType.SingleThreaded);
-            }
+            _logger.LogTrace($"Loading PKCS11 library at {libPath}");
+            _p11 = Pkcs11LibraryLoader.LoadPkcs11Library(libPath, _logger);
         }
 
         public ISlot GetOpenSlot()
@@ -177,10 +171,9 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
                 _p11Session.Logout();
                 _p11Session.Dispose();
             }
-            finally
+            catch
             {
-                // unload unmanaged PKCS11 library
-                //_p11.Dispose();
+                _logger.LogDebug("PKCS11 Session was already logged out or disposed.");
             }
         }
     }
