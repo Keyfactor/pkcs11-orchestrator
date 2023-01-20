@@ -1,21 +1,44 @@
-# cpr-orchestrator-template
+# PKCS11
 
-## Template for new Orchestrator projects
+This Orchestrator Extension allows for interacting with PKCS11-compatible devices to inventory certificates and enroll new certificates with on-device key generation via a reenrollment job.
 
-Use this repository to create new integrations for orcehstrator types. Update the following properties in the integration-manifest.json
+#### Integration status: Prototype - Demonstration quality. Not for use in customer environments.
 
-* "name": "Integration Template",
-* "status": "prototype",
-* "description": "This project is meant to be a template to quickly build a basic integration product build. Currently in dev, a work in progress,",
+## About the Keyfactor Universal Orchestrator Capability
 
-For each platform, define which capabilities are present for this integration. You must update the boolean properties for both win and linux platforms.
+This repository contains a Universal Orchestrator Capability which is a plugin to the Keyfactor Universal Orchestrator. Within the Keyfactor Platform, Orchestrators are used to manage “certificate stores” &mdash; collections of certificates and roots of trust that are found within and used by various applications.
 
-* "supportsCreateStore"
-* "supportsDiscovery"
-* "supportsManagementAdd"
-* "supportsManagementRemove"
-* "supportsReenrollment"
-* "supportsInventory"
+The Universal Orchestrator is part of the Keyfactor software distribution and is available via the Keyfactor customer portal. For general instructions on installing Capabilities, see the “Keyfactor Command Orchestrator Installation and Configuration Guide” section of the Keyfactor documentation. For configuration details of this specific Capability, see below in this readme.
 
-When the repository is ready to be made public, the catalog must include a property to display the link to the github repo.
-* "link_github": true
+The Universal Orchestrator is the successor to the Windows Orchestrator. This Capability plugin only works with the Universal Orchestrator and does not work with the Windows Orchestrator.
+
+
+
+
+---
+
+
+
+
+## Platform Specific Notes
+
+The Keyfactor Universal Orchestrator may be installed on either Windows or Linux based platforms. The certificate operations supported by a capability may vary based what platform the capability is installed on. The table below indicates what capabilities are supported based on which platform the encompassing Universal Orchestrator is running.
+| Operation | Win | Linux |
+|-----|-----|------|
+|Supports Management Add|  |  |
+|Supports Management Remove|  |  |
+|Supports Create Store|  |  |
+|Supports Discovery|  |  |
+|Supports Renrollment|&check; |  |
+|Supports Inventory|&check; |  |
+
+
+
+
+---
+
+
+
+### License
+[Apache](https://apache.org/licenses/LICENSE-2.0)
+
