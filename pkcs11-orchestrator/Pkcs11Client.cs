@@ -12,12 +12,15 @@ using Org.BouncyCastle.Asn1.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Keyfactor.Logging;
+using Org.BouncyCastle.Asn1.Nist;
+using Org.BouncyCastle.Asn1.X9;
+using Org.BouncyCastle.Math.EC;
+using Org.BouncyCastle.Security;
 
 namespace Keyfactor.Orchestrator.Extensions.Pkcs11
 {
     public class Pkcs11Client : IDisposable
     {
-        string pkcs11LibraryPath = "";
         private IPkcs11Library _p11 = null;
         private ISession _p11Session;
         private ILogger _logger;
@@ -32,8 +35,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
 
         public ISlot GetOpenSlot()
         {
-            var slots = _p11.GetSlotList(SlotsType.WithOrWithoutTokenPresent);
-            //return slots.First(slot => !slot.GetSlotInfo().SlotFlags.TokenPresent); // all slots actually have tokens present from start
+            var slots = _p11.GetSlotList(SlotsType.WithTokenPresent);
             return slots.First();
         }
 
@@ -81,52 +83,75 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
             return privKeyFound.Count == 1;
         }
 
-        public void GenerateKeyPair(ISession session, string alias, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle, out byte[] outCkaId)
+        public void GenerateKeyPair(ISession session, string alias, string keyType, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle, out byte[] outCkaId)
         {
             // The CKA_ID attribute is supposed to be the same for a keypair and matching certificate
             byte[] ckaId = session.GenerateRandom(20);
 
-            // Prepare attribute template of new public key
             List<IObjectAttribute> publicKeyAttributes = new List<IObjectAttribute>();
-            //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, alias));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY, true));
-            //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY_RECOVER, false)); // not supported
-            //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048)); // make this a json setting?
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01 }));
-
-            // Prepare attribute template of new private key
             List<IObjectAttribute> privateKeyAttributes = new List<IObjectAttribute>();
-            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
-            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, true));
-            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, alias));
-            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
-            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SENSITIVE, true));
-            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
-            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN, true));
-            //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN_RECOVER, false)); // not supported
-            //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
+            IMechanism mechanism;
+            if (keyType == "RSA")
+            {
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, alias));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY, true));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048)); // make this a json setting?
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01 }));
 
-            // Specify key generation mechanism
-            IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, true));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, alias));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SENSITIVE, true));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN, true));
+
+                mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
+            }
+            else
+            {
+                // get curve parameter
+                X962Parameters x962Parameters = new X962Parameters(NistNamedCurves.GetByName("P-256"));
+                byte[] ecParams = x962Parameters.GetDerEncoded();
+
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, alias));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY, true));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EC_PARAMS, ecParams));
+
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, true));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, alias));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SENSITIVE, true));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN, true));
+
+                mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_EC_KEY_PAIR_GEN);
+            }
 
             // Generate key pair
             session.GenerateKeyPair(mechanism, publicKeyAttributes, privateKeyAttributes, out publicKeyHandle, out privateKeyHandle);
             outCkaId = ckaId;
         }
 
-        public string CreateCsr(ISession session, string subjectIn, IObjectHandle publicKeyHandle, IObjectHandle privateKeyHandle)
+        public string CreateCsr(ISession session, string subjectIn, string keyType, IObjectHandle publicKeyHandle, IObjectHandle privateKeyHandle)
         {
             AsymmetricKeyParameter publicKey = null;
             var subject = new X509Name(subjectIn);
-            var sigAlg = PkcsObjectIdentifiers.Sha256WithRsaEncryption.Id;
-            string keytype = "RSA";
-            if (keytype == "RSA")
+            string sigAlg;
+            IMechanism mechanism;
+
+            if (keyType == "RSA")
             {
+                sigAlg = PkcsObjectIdentifiers.Sha256WithRsaEncryption.Id;
+                mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA256_RSA_PKCS);
+
                 var keyAttributesToGet = new List<CKA>()
                 {
                     CKA.CKA_PUBLIC_EXPONENT,
@@ -139,8 +164,30 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
                 var modulus = new BigInteger(1, publicKeyAttributes[1].GetValueAsByteArray());
                 publicKey = new RsaKeyParameters(false, modulus, exponent);
             }
+            else
+            {
+                sigAlg = "SHA256withECDSA";
+                mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_ECDSA_SHA256);
+
+                var keyAttributesToGet = new List<CKA>()
+                {
+                    CKA.CKA_EC_POINT,
+                    CKA.CKA_EC_PARAMS,
+                    CKA.CKA_KEY_TYPE
+                };
+
+                var publicKeyAttributes = session.GetAttributeValue(publicKeyHandle, keyAttributesToGet);
+
+                X9ECParameters curveParams = ECNamedCurveTable.GetByName("P-256");
+                ECCurve curve = curveParams.Curve;
+                ECDomainParameters domainParams = new ECDomainParameters(curve, curveParams.G, curveParams.N, curveParams.H);
+                ECPoint point = curve.DecodePoint(publicKeyAttributes[0].GetValueAsByteArray());
+
+                publicKey = new ECPublicKeyParameters(point, domainParams);
+            }
+
             var csr = new Pkcs10CertificationRequestDelaySigned(sigAlg, subject, publicKey, null);
-            var csrSignature = session.Sign(session.Factories.MechanismFactory.Create(CKM.CKM_SHA256_RSA_PKCS), privateKeyHandle, csr.GetDataToSign());
+            var csrSignature = session.Sign(mechanism, privateKeyHandle, csr.GetDataToSign());
             csr.SignRequest(csrSignature);
             var formattedCsr = $"-----BEGIN CERTIFICATE REQUEST-----\n{Convert.ToBase64String(csr.GetDerEncoded(), Base64FormattingOptions.InsertLineBreaks)}\n-----END CERTIFICATE REQUEST-----";
             return formattedCsr;

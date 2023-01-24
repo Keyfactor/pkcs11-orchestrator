@@ -40,11 +40,11 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs
                 IObjectHandle pubKeyHandle, privKeyHandle;
                 byte[] ckaId;
                 logger.LogDebug("Attempting to generate new keypair.");
-                p11.GenerateKeyPair(session, label, out pubKeyHandle, out privKeyHandle, out ckaId);
+                p11.GenerateKeyPair(session, label, keyType, out pubKeyHandle, out privKeyHandle, out ckaId);
                 logger.LogInformation("New keypair generated on PKCS11 device.");
 
                 logger.LogDebug("Creating CSR...");
-                string csr = p11.CreateCsr(session, subject, pubKeyHandle, privKeyHandle);
+                string csr = p11.CreateCsr(session, subject, keyType, pubKeyHandle, privKeyHandle);
 
                 logger.LogDebug("Submitting CSR to Keyfactor");
                 var cert = submitReenrollmentUpdate.Invoke(csr);
