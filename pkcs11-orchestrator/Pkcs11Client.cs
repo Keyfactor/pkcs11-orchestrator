@@ -206,7 +206,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
             return formattedCsr;
         }
 
-        public IObjectHandle StoreCertificate(ISession session, byte[] ckaId, X509Certificate2 cert)
+        public IObjectHandle StoreCertificate(ISession session, string label, string subject, byte[] ckaId, X509Certificate2 cert)
         {
             // set up CK object with certificate attributes
             List<IObjectAttribute> certificateAttributes = new List<IObjectAttribute>();
@@ -214,9 +214,9 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509));
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
-            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, "keyfactor"));
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, label));
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId)); // use existing ID of the keypair
-            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SUBJECT, "CN=pkcs11test&O=Keyfactor")); // TODO: paramterize subject
+            certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SUBJECT, subject)); // TODO: paramterize subject
             certificateAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE, cert.RawData));
             
             return session.CreateObject(certificateAttributes);

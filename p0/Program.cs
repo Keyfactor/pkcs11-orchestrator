@@ -74,7 +74,7 @@ BGEcQzfZfyC17B93uX6+HPesS444RFj/ANK9hDC8vwYIb9a3X3mF/hAaVFlUpvu1
 
             Console.WriteLine("Uploading a certificate to existing CKA ID");
             var dotnetcert = new X509Certificate2(cert.GetEncoded());
-            p11.StoreCertificate(session, ckaId, dotnetcert);
+            p11.StoreCertificate(session, "keyfactor", "CN=pkcs11test&O=Keyfactor", ckaId, dotnetcert);
 
 
             Console.WriteLine("Searching for all certificates");

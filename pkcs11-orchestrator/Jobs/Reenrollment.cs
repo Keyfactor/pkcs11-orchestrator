@@ -62,7 +62,7 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs
                 logger.LogTrace("Certificate returned from CSR enrollment.");
 
                 logger.LogDebug("Storing enrolled certificate on PKCS11 device.");
-                p11.StoreCertificate(session, ckaId, cert);
+                p11.StoreCertificate(session, label, subject, ckaId, cert);
                 logger.LogTrace("Certificate stored successfully.");
             }
 
