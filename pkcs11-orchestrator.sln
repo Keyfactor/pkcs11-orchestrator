@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pkcs11-orchestrator", "pkcs11-orchestrator\pkcs11-orchestrator.csproj", "{586C37B0-C959-4625-87DC-6B8C89B0E1AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pkcs11-orchestrator", "pkcs11-orchestrator\pkcs11-orchestrator.csproj", "{586C37B0-C959-4625-87DC-6B8C89B0E1AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "p0", "p0\p0.csproj", "{2BA9E569-590E-430B-897A-F4966BA8C973}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pkcs11-tester", "p0\pkcs11-tester.csproj", "{2BA9E569-590E-430B-897A-F4966BA8C973}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
