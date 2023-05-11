@@ -1,4 +1,18 @@
-﻿using Net.Pkcs11Interop.Common;
+﻿// Copyright 2023 Keyfactor
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
 using Org.BouncyCastle.Utilities.IO.Pem;
 using Org.BouncyCastle.X509;
@@ -23,8 +37,8 @@ namespace p0
             string pin = "5678";
             var session = p11.LogInToSlot(slot, pin);
             IObjectHandle pubKey, privKey;
-            p11.GenerateKeyPair(session, "keyfactor", out pubKey, out privKey, out byte[] ckaId);
-            var csr = p11.CreateCsr(session, "CN=pkcs11test&O=Keyfactor", pubKey, privKey);
+            p11.GenerateKeyPair(session, "keyfactor", "RSA", out pubKey, out privKey, out byte[] ckaId);
+            var csr = p11.CreateCsr(session, "CN=pkcs11test&O=Keyfactor", "RSA", pubKey, privKey);
             Console.WriteLine("Generated CSR with keys in HSM:");
             Console.WriteLine(csr);
 
@@ -60,7 +74,7 @@ BGEcQzfZfyC17B93uX6+HPesS444RFj/ANK9hDC8vwYIb9a3X3mF/hAaVFlUpvu1
 
             Console.WriteLine("Uploading a certificate to existing CKA ID");
             var dotnetcert = new X509Certificate2(cert.GetEncoded());
-            p11.StoreCertificate(session, ckaId, dotnetcert);
+            p11.StoreCertificate(session, "keyfactor", "CN=pkcs11test&O=Keyfactor", ckaId, dotnetcert);
 
 
             Console.WriteLine("Searching for all certificates");
