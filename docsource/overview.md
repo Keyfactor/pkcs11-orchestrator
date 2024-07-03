@@ -1,0 +1,4 @@
+## Overview
+
+The PKCS11 Universal Orchestrator extension connects to PKCS11-compatible devices, such as Hardware Security Modules (HSMs), through their respective PKCS11 libraries. This extension facilitates the remote management of cryptographic certificates stored on these devices, leveraging Keyfactor Command to perform certificate operations. By using the PKCS11 extension, administrators can perform tasks such as inventorying current certificates and reenrolling certificates by generating new keys on the device. PKCS11 is a standard interface used for managing cryptographic tokens, enabling secure storage and management of digital certificates and keys. This ensures that cryptographic operations are handled in a secure, tamper-proof manner provided by the physical and logical protections of the HSM.
+

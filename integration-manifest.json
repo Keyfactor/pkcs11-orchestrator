@@ -1,29 +1,31 @@
 {
-  "$schema": "https://keyfactor.github.io/integration-manifest-schema.json",
-  "integration_type": "orchestrator",
-  "name": "PKCS11",
-  "status": "production",
-  "support_level": "kf-supported",
-  "description": "This Orchestrator Extension allows for interacting with PKCS11-compatible devices to inventory certificates and enroll new certificates with on-device key generation via a reenrollment job.",
-  "link_github": false,
-  "about": {
-    "orchestrator": {
-      "win": {
-        "supportsCreateStore": false,
-        "supportsDiscovery": false,
-        "supportsManagementAdd": false,
-        "supportsManagementRemove": false,
-        "supportsReenrollment": true,
-        "supportsInventory": true
-      },
-      "linux": {
-        "supportsCreateStore": false,
-        "supportsDiscovery": false,
-        "supportsManagementAdd": false,
-        "supportsManagementRemove": false,
-        "supportsReenrollment": false,
-        "supportsInventory": false
-      }
-    }
-  }
+    "$schema": "/Users/hroszell/coding/dev/staff-tools/keyfactor.github.io/v2/integration-manifest-schema.json",
+    "integration_type": "orchestrator",
+    "name": "PKCS11",
+    "status": "production",
+    "support_level": "kf-supported",
+    "description": "This Orchestrator Extension allows for interacting with PKCS11-compatible devices to inventory certificates and enroll new certificates with on-device key generation via a reenrollment job.",
+    "link_github": true,
+    "about": {
+        "orchestrator": {
+            "win": {
+                "supportsCreateStore": false,
+                "supportsDiscovery": false,
+                "supportsManagementAdd": false,
+                "supportsManagementRemove": false,
+                "supportsReenrollment": true,
+                "supportsInventory": true
+            },
+            "linux": {
+                "supportsCreateStore": false,
+                "supportsDiscovery": false,
+                "supportsManagementAdd": false,
+                "supportsManagementRemove": false,
+                "supportsReenrollment": false,
+                "supportsInventory": false
+            },
+            "store_types": []
+        }
+    },
+    "update_catalog": true
 }
