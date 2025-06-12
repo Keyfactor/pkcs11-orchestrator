@@ -52,7 +52,7 @@
               }
             }
           ],
-          "ClientMachineDescription": "Any display name for the store",
+          "ClientMachineDescription": "Not used.  Enter any non-empty value",
           "StorePathDescription": "The absolute path to the PKCS11 library DLL"
         }
       ]
