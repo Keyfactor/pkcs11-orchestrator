@@ -238,7 +238,7 @@ the Keyfactor Command Portal
    | --------- | ----------- |
    | Category | Select "PKCS11" or the customized certificate store name from the previous step. |
    | Container | Optional container to associate certificate store with. |
-   | Client Machine | Any display name for the store |
+   | Client Machine | Not used.  Enter any non-empty value |
    | Store Path | The absolute path to the PKCS11 library DLL |
    | Orchestrator | Select an approved orchestrator capable of managing `PKCS11` certificates. Specifically, one with the `PKCS11` capability. |
 
@@ -263,7 +263,7 @@ the Keyfactor Command Portal
    | --------- | ----------- |
    | Category | Select "PKCS11" or the customized certificate store name from the previous step. |
    | Container | Optional container to associate certificate store with. |
-   | Client Machine | Any display name for the store |
+   | Client Machine | Not used.  Enter any non-empty value |
    | Store Path | The absolute path to the PKCS11 library DLL |
    | Orchestrator | Select an approved orchestrator capable of managing `PKCS11` certificates. Specifically, one with the `PKCS11` capability. |
 
