@@ -20,7 +20,7 @@
           "BlueprintAllowed": false,
           "CustomAliasAllowed": "Required",
           "PowerShell": false,
-          "PrivateKeyAllowed": "Required",
+          "PrivateKeyAllowed": "Optional",
           "SupportedOperations": {
             "Add": false,
             "Create": false,
