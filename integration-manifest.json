@@ -6,6 +6,9 @@
   "support_level": "kf-supported",
   "description": "This Orchestrator Extension allows for interacting with PKCS11-compatible devices to inventory certificates and enroll new certificates with on-device key generation via a reenrollment job.",
   "link_github": false,
+  "update_catalog": true,
+  "release_project": "pkcs11-orchestrator/pkcs11-orchestrator.csproj",
+  "release_dir": "pkcs11-orchestrator/bin/Release",
   "about": {
     "orchestrator": {
       "UOFramework": "10.4",
