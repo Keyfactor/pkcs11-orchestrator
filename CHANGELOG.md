@@ -1,3 +1,8 @@
+1.1.0
+- Implement .net6/8 dual build
+- Convert documentation for doctool
+- Add PAM support for Store Password (device PIN)
+
 1.0.0
 - Initial release
 - Support Inventory to find all certificates on the first available Slot

@@ -14,6 +14,7 @@
 
 using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Extensions;
+using Keyfactor.Orchestrators.Extensions.Interfaces;
 using Microsoft.Extensions.Logging;
 using Net.Pkcs11Interop.HighLevelAPI;
 using System;
@@ -24,13 +25,19 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs
 {
     public class Inventory : IInventoryJobExtension
     {
-        public string ExtensionName => "PKCS11";
+        public string ExtensionName => "";
+        internal IPAMSecretResolver Resolver { get; set; }
+
+        public Inventory(IPAMSecretResolver resolver)
+        {
+            Resolver = resolver;
+        }
 
         public JobResult ProcessJob(InventoryJobConfiguration jobConfiguration, SubmitInventoryUpdate submitInventoryUpdate)
         {
             ILogger logger = LogHandler.GetClassLogger<Inventory>();
+            string userPin = PAMUtilities.ResolvePAMField(Resolver, logger, "Store Password", jobConfiguration.CertificateStoreDetails.StorePassword);
             string pkcs11LibraryPath = jobConfiguration.CertificateStoreDetails.StorePath;
-            string userPin = jobConfiguration.CertificateStoreDetails.StorePassword;
 
             logger.LogDebug($"Attempting to load PKCS11 Library at {pkcs11LibraryPath}");
             Pkcs11Client p11 = new Pkcs11Client(pkcs11LibraryPath);
