@@ -6,24 +6,59 @@
   "support_level": "kf-supported",
   "description": "This Orchestrator Extension allows for interacting with PKCS11-compatible devices to inventory certificates and enroll new certificates with on-device key generation via a reenrollment job.",
   "link_github": false,
+  "update_catalog": true,
+  "release_project": "pkcs11-orchestrator/pkcs11-orchestrator.csproj",
+  "release_dir": "pkcs11-orchestrator/bin/Release",
   "about": {
     "orchestrator": {
-      "win": {
-        "supportsCreateStore": false,
-        "supportsDiscovery": false,
-        "supportsManagementAdd": false,
-        "supportsManagementRemove": false,
-        "supportsReenrollment": true,
-        "supportsInventory": true
-      },
-      "linux": {
-        "supportsCreateStore": false,
-        "supportsDiscovery": false,
-        "supportsManagementAdd": false,
-        "supportsManagementRemove": false,
-        "supportsReenrollment": false,
-        "supportsInventory": false
-      }
+      "UOFramework": "10.4",
+      "pam_support": true,
+      "keyfactor_platform_version": "10.4",
+      "store_types": [
+        {
+          "Name": "PKCS11",
+          "ShortName": "PKCS11",
+          "Capability": "PKCS11",
+          "ServerRequired": false,
+          "BlueprintAllowed": false,
+          "CustomAliasAllowed": "Required",
+          "PowerShell": false,
+          "PrivateKeyAllowed": "Optional",
+          "SupportedOperations": {
+            "Add": false,
+            "Create": false,
+            "Discovery": false,
+            "Enrollment": true,
+            "Remove": false
+          },
+          "PasswordOptions": {
+            "EntrySupported": false,
+            "StoreRequired": true,
+            "Style": "Default",
+            "StorePassword": {
+              "Description": "The PIN to access the device",
+              "IsPAMEligible": true
+            }
+          },
+          "Properties": [],
+          "EntryParameters": [
+            {
+              "Name": "label",
+              "DisplayName": "Label (Alias)",
+              "Type": "String",
+              "Description": "Name for the key pair which will also serve as the certificate's alias in Keyfactor",
+              "RequiredWhen": {
+                "HasPrivateKey": false,
+                "OnAdd": false,
+                "OnRemove": false,
+                "OnReenrollment": true
+              }
+            }
+          ],
+          "ClientMachineDescription": "Not used.  Enter any non-empty value",
+          "StorePathDescription": "The absolute path to the PKCS11 library DLL"
+        }
+      ]
     }
   }
 }

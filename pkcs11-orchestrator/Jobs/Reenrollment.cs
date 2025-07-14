@@ -14,6 +14,7 @@
 
 using Keyfactor.Logging;
 using Keyfactor.Orchestrators.Extensions;
+using Keyfactor.Orchestrators.Extensions.Interfaces;
 using Microsoft.Extensions.Logging;
 using Net.Pkcs11Interop.HighLevelAPI;
 
@@ -21,13 +22,19 @@ namespace Keyfactor.Orchestrator.Extensions.Pkcs11.Jobs
 {
     public class Reenrollment : IReenrollmentJobExtension
     {
-        public string ExtensionName => "PKCS11";
+        public string ExtensionName => "";
+        internal IPAMSecretResolver Resolver { get; set; }
+
+        public Reenrollment(IPAMSecretResolver resolver)
+        {
+            Resolver = resolver;
+        }
 
         public JobResult ProcessJob(ReenrollmentJobConfiguration jobConfiguration, SubmitReenrollmentCSR submitReenrollmentUpdate)
         {
             ILogger logger = LogHandler.GetClassLogger<Reenrollment>();
+            string userPin = PAMUtilities.ResolvePAMField(Resolver, logger, "Store Password", jobConfiguration.CertificateStoreDetails.StorePassword);
             string pkcs11LibraryPath = jobConfiguration.CertificateStoreDetails.StorePath;
-            string userPin = jobConfiguration.CertificateStoreDetails.StorePassword;
 
             var allJobProps = jobConfiguration.JobProperties;
             string subject = allJobProps["subjectText"].ToString();
