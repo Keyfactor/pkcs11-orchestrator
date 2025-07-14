@@ -234,12 +234,13 @@ the Keyfactor Command Portal
 
     Click the Add button to add a new Certificate Store. Use the table below to populate the **Attributes** in the **Add** form.
 
-   | Attribute | Description |
-   | --------- | ----------- |
+   | Attribute | Description                                             |
+   | --------- |---------------------------------------------------------|
    | Category | Select "PKCS11" or the customized certificate store name from the previous step. |
    | Container | Optional container to associate certificate store with. |
    | Client Machine | Not used.  Enter any non-empty value |
    | Store Path | The absolute path to the PKCS11 library DLL |
+   | Store Password | The PIN to access the device |
    | Orchestrator | Select an approved orchestrator capable of managing `PKCS11` certificates. Specifically, one with the `PKCS11` capability. |
 
 </details>
@@ -265,6 +266,7 @@ the Keyfactor Command Portal
    | Container | Optional container to associate certificate store with. |
    | Client Machine | Not used.  Enter any non-empty value |
    | Store Path | The absolute path to the PKCS11 library DLL |
+   | Store Password | The PIN to access the device |
    | Orchestrator | Select an approved orchestrator capable of managing `PKCS11` certificates. Specifically, one with the `PKCS11` capability. |
 
 3. **Import the CSV file to create the certificate stores**
@@ -283,7 +285,7 @@ If a PAM provider was installed _on the Universal Orchestrator_ in the [Installa
 
    | Attribute | Description |
    | --------- | ----------- |
-   | StorePassword | Password to use when reading/writing to store |
+   | StorePassword | The PIN to access the device |
 
 Please refer to the **Universal Orchestrator (remote)** usage section ([PAM providers on the Keyfactor Integration Catalog](https://keyfactor.github.io/integrations-catalog/content/pam)) for your selected PAM provider for instructions on how to load attributes orchestrator-side.
 > Any secret can be rendered by a PAM provider _installed on the Keyfactor Command server_. The above parameters are specific to attributes that can be fetched by an installed PAM provider running on the Universal Orchestrator server itself.
